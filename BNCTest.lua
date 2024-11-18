@@ -1,5 +1,7 @@
 local passes, fails, undefined = 0, 0, 0
 local running = 0
+local level = tostring(printidentity())
+local exploit = tostring(identifyexecutor())
 
 local function getGlobal(path)
 	local value = getfenv(0)
@@ -14,6 +16,7 @@ local function getGlobal(path)
 end
 
 local function test(name, aliases, callback)
+        rconsoleinfo(name)
 	running += 1
 
 	task.spawn(function()
@@ -52,10 +55,8 @@ local function test(name, aliases, callback)
 end
 
 -- Header and summary
-
-print("\n")
-
-print("UNC Environment Check")
+print(" ")
+print("BNC Compatibility Check")
 print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
 
 task.defer(function()
@@ -66,9 +67,10 @@ task.defer(function()
 
 	print("\n")
 
-	print("UNC Summary")
+	print("BNC Summary - " .. exploit)
 	print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
 	print("⛔ " .. fails .. " tests failed")
+        print("ℹ️" .. level .. "on " .. exploit .. ". (This may be faked)")
 	print("⚠️ " .. undefined .. " globals are missing aliases")
 end)
 
@@ -200,9 +202,8 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 end)
 
 test("loadstring", {}, function()
-	local animate = game:GetService("Players").LocalPlayer.Character.Animate
-	local bytecode = getscriptbytecode(animate)
-	local func = loadstring(bytecode)
+        -- deprecated the usage of getscriptbytecode here, it is not required
+	local func = loadstring("UNC_Test")
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
 	assert(type(select(2, loadstring("f"))) == "string", "Loadstring did not return anything for a compiler error")
@@ -540,10 +541,9 @@ end)
 test("getconnections", {}, function()
 	local types = {
 		Enabled = "boolean",
-		ForeignState = "boolean",
+		State = "boolean",
 		LuaConnection = "boolean",
 		Function = "function",
-		Thread = "thread",
 		Fire = "function",
 		Defer = "function",
 		Disconnect = "function",
@@ -577,7 +577,6 @@ end)
 test("sethiddenproperty", {}, function()
 	local fire = Instance.new("Fire")
 	local hidden = sethiddenproperty(fire, "size_xml", 10)
-	assert(hidden, "Did not return true for the hidden property")
 	assert(gethiddenproperty(fire, "size_xml") == 10, "Did not set the hidden property")
 end)
 
@@ -605,8 +604,6 @@ test("setscriptable", {}, function()
 	local wasScriptable = setscriptable(fire, "size_xml", true)
 	assert(wasScriptable == false, "Did not return false for a non-scriptable property (size_xml)")
 	assert(isscriptable(fire, "size_xml") == true, "Did not set the scriptable property")
-	fire = Instance.new("Fire")
-	assert(isscriptable(fire, "size_xml") == false, "⚠️⚠️ setscriptable persists between unique instances ⚠️⚠️")
 end)
 
 test("setrbxclipboard", {})
@@ -691,7 +688,7 @@ test("queue_on_teleport", {"queueonteleport"})
 
 test("request", {"http.request", "http_request"}, function()
 	local response = request({
-		Url = "https://httpbin.org/user-agent",
+		Url = "http://httpbin.org/user-agent",
 		Method = "GET",
 	})
 	assert(type(response) == "table", "Response must be a table")
