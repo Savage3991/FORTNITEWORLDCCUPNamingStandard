@@ -56,7 +56,7 @@ end
 
 -- Header and summary
 print(" ")
-print("BNC Compatibility Check")
+print("BNC Compatibility Check - " .. exploit)
 print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
 
 task.defer(function()
