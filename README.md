@@ -28,7 +28,7 @@ NOTICE: If you, as a product owner, do not have all of these functions but yet s
 
 ## Checking your environment
 
-You can run the BNC environment checking script to see how well your executor environment supports the BNC standard. Find the script [here.](BNCCheckEnv.lua) The script determines what is missing, and writes the results to file under workspace.
+You can run the BNC environment checking script to see how well your executor environment supports the BNC standard. Find the script [here.](BNCTest.lua) The script determines what is missing, and writes the results to file under workspace.
 
 ## Contributing
 Go [here](CONTRIBUTING.md) for a guide on contributing.
