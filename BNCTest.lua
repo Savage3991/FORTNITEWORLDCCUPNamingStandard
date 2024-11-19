@@ -252,6 +252,13 @@ test("crypt.encrypt", {}, function()
 	assert(decrypted == "test", "Failed to decrypt raw string from encrypted data")
 end)
 
+test("decompile", {"saveinstance"}, function()
+    local script = Instance.new("LocalScript")
+    script.Source = 'print("Hello from BNC! A vanilla scripting standard.")'
+    local decompiled = decompile(script)
+    assert(decompiled:match('print%s*%("Hello from BNC! A vanilla scripting standard."%)') ~= nil, "Decompiled source is inaccurate.")
+end)
+
 test("crypt.decrypt", {}, function()
 	local key, iv = crypt.generatekey(), crypt.generatekey()
 	local encrypted = crypt.encrypt("test", key, iv, "CBC")
