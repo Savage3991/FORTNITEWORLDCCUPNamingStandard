@@ -15,51 +15,37 @@ local function getGlobal(path)
 	return value
 end
 
-local function test(name, aliases, callback)
-        rconsoleinfo(name) -- debug which function thats going to get tested
-	running += 1
+local function test(name, aliases, callback) -- BNC Revamped Test Function
+    -- Debug: Print which function is going to be tested
+    rconsoleinfo(name)
+    running = running + 1 
 
-	task.spawn(function()
-		if not callback then
-			print("⏺️ " .. name)
-		elseif not getGlobal(name) then
-			fails += 1
-			warn("⛔ " .. name)
-		else
-			local success, message = pcall(callback)
-	
-			if success then
-				passes += 1
-				print("✅ " .. name .. (message and " • " .. message or ""))
-			else
-				fails += 1
-				warn("⛔ " .. name .. " failed: " .. message)
-			end
-		end
-	
-		local undefinedAliases = {}
-	
-		for _, alias in ipairs(aliases) do
-			if getGlobal(alias) == nil then
-				table.insert(undefinedAliases, alias)
-			end
-		end
-	
-		if #undefinedAliases > 0 then
-			undefined += 1
-			warn("⚠️ " .. table.concat(undefinedAliases, ", "))
-		end
-
-		running -= 1
-	end)
-end
+    task.spawn(function()
+        -- If callback isn't provided, just print the function name.
+        if not callback then
+            print("⏺️ " .. name)
+        elseif not getGlobal(name) then
+            -- If the global function doesn't exist.
+            fails = fails + 1
+            warn("⛔ " .. name .. " is undefined.")
+        else
+            -- Execute the callback and handle success & failure
+            local success, message = pcall(callback)
+            if success then
+                passes = passes + 1
+                print("✅ " .. name .. (message and " • " .. message or ""))
+            else
+                fails = fails + 1
+                warn("⛔ " .. name .. " failed: " .. message)
+            end
+        end
 
 -- Header and summary
 
-print("\n")
-
+print("Intializing BNC Test..")
+wait(1)
 print(" ")
-print("BNC Compatibility Check" .. exploit)
+print("BNC Compatibility Check - " .. exploit)
 print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
 
 task.defer(function()
@@ -205,8 +191,7 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 end)
 
 test("loadstring", {}, function()
-        -- deprecated the usage of getscriptbytecode here, it is not required
-	local func = loadstring("UNC_Test")
+	local func = loadstring("BNC_Test")
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
 	assert(type(select(2, loadstring("f"))) == "string", "Loadstring did not return anything for a compiler error")
@@ -596,20 +581,25 @@ test("getnilinstances", {}, function()
 	assert(getnilinstances()[1].Parent == nil, "The first value is not parented to nil")
 end)
 
+-- Revamped the scriptables tests
+
 test("isscriptable", {}, function()
-	local fire = Instance.new("Fire")
-	assert(isscriptable(fire, "size_xml") == false, "Did not return false for a non-scriptable property (size_xml)")
-	assert(isscriptable(fire, "Size") == true, "Did not return true for a scriptable property (Size)")
+    local fire = Instance.new("Fire")
+    assert(isscriptable(fire, "size_xml") == false, "Expected 'size_xml' to be non-scriptable.")
+    assert(isscriptable(fire, "Size") == true, "Expected 'Size' to be scriptable.")
 end)
 
---[[
+
 test("setscriptable", {}, function()
-	local fire = Instance.new("Fire")
-	local wasScriptable = setscriptable(fire, "size_xml", true)
-	assert(wasScriptable == false, "Did not return false for a non-scriptable property (size_xml)")
-	assert(isscriptable(fire, "size_xml") == true, "Did not set the scriptable property")
-end) -- Flawed test, BNC doesn't test for this.
-]]
+    local part = Instance.new("Part")
+    local wasScriptable = setscriptable(part, "Transparency", true)
+    assert(wasScriptable == false, "Transparency should not be scriptable initially.")
+    assert(isscriptable(part, "Transparency") == true, "Transparency should be scriptable now.")
+    assert(setscriptable(part, "Transparency", false) == true, "Transparency should have been scriptable before.")
+end)
+
+
+
 test("setrbxclipboard", {})
 
 -- Metatable
@@ -999,7 +989,6 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 end)
 
 test("loadstring", {}, function()
-        -- deprecated the usage of getscriptbytecode here, it is not required
 	local func = loadstring("UNC_Test")
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
@@ -1663,3 +1652,26 @@ test("WebSocket.connect", {}, function()
 	end
 	ws:Close()
 end)
+
+-- Actors
+
+test("getactors", function()
+    local actors = getactors()
+    assert(#actors > 0, "No actors found. Ensure the game contains actors.")
+    for index, actor in ipairs(actors) do print(index, actor) end
+end)
+
+test("run_on_actor", function()
+    local actors = getactors()
+    assert(#actors > 0, "No actors available for testing.")
+    assert(pcall(run_on_actor, actors[1], 'print("Hello from BNC!")'), "Failed to run code on actor.")
+end)
+
+test("create_comm_channel", function()
+    local comm_id, event = create_comm_channel()
+    assert(type(comm_id) == "string" and event:IsA("BindableEvent"), "Invalid comm_channel result.")
+    event.Event:Connect(function(data) assert(data == "Test Data", "Event data mismatch.") end)
+    event:Fire("Test Data")
+end)
+
+-- BetterNamingConvention Compatability Test 
