@@ -146,6 +146,27 @@ local bytecode = getscriptbytecode(animate)
 
 ---
 
+## decompile
+
+```lua
+function decompile(script: LocalScript | ModuleScript): string
+```
+
+Decompiles the script returning a decompiled version of it's source code.
+
+### Parameters
+
+* `script` - The script to decompile 
+
+### Example
+
+```lua
+local decompiled_source = decompile(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
+print("Decompiled Source: ",decompiled_source)
+```
+
+---
+
 ## getscriptclosure
 
 ```lua
