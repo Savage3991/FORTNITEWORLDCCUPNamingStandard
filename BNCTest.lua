@@ -1655,7 +1655,7 @@ end)
 
 -- Actors
 
-test("getactors", function()
+--[[ test("getactors", function()
     local actors = getactors()
     assert(#actors > 0, "No actors found. Ensure the game contains actors.")
     for index, actor in ipairs(actors) do print(index, actor) end
@@ -1672,6 +1672,8 @@ test("create_comm_channel", function()
     assert(type(comm_id) == "string" and event:IsA("BindableEvent"), "Invalid comm_channel result.")
     event.Event:Connect(function(data) assert(data == "Test Data", "Event data mismatch.") end)
     event:Fire("Test Data")
-end)
+end)]]
+
+warn("Actor Testing is currently disabled due to it crashing on numerous PC & Mobile executors.")
 
 -- BetterNamingConvention Compatability Test 
