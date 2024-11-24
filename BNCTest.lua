@@ -769,6 +769,12 @@ test("getscriptbytecode", {"dumpstring"}, function()
 	assert(type(bytecode) == "string", "Did not return a string for Character.Animate (a " .. animate.ClassName .. ")")
 end)
 
+test("setscriptbytecode", {}, function()
+	local script = Instance.new("LocalScript")
+	local success = setscriptbytecode(script, "")
+	assert(success == true, "Did not return success for operation")
+end)
+
 test("getscripthash", {}, function()
 	local animate = game:GetService("Players").LocalPlayer.Character.Animate:Clone()
 	local hash = getscripthash(animate)
