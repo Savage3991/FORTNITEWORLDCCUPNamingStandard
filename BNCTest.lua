@@ -1,6 +1,6 @@
 local passes, fails, undefined = 0, 0, 0
 local running = 0
-local exploit = tostring(identifyexecutor())
+
 local function getGlobal(path)
 	local value = getfenv(0)
 
@@ -68,7 +68,7 @@ task.defer(function()
     local outOf = passes .. " out of " .. (passes + fails)
 
     print("\n")
-    print("BNC Summary - " .. exploit)
+    print("BNC Summary - " .. os.date)
     print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
     print("⛔ " .. fails .. " tests failed")
     print("ℹ️ " .. tostring(printidentity()) .. " on " .. tostring(identifyexecutor()) .. ". (This may be faked)")
