@@ -129,14 +129,6 @@ function getscriptbytecode(script: LocalScript | ModuleScript): string
 
 Returns the raw Luau bytecode of the given script.
 
-## setscriptbytecode
-
-```lua
-function setscriptbytecode(script: LocalScript | ModuleScript, bytecode: string): boolean
-```
-
-Sets the raw Luau bytecode of a given script. Returns true if operation is successful.
-
 ### Parameters
 
  * `script` - A client-running LocalScript or ModuleScript.
@@ -150,6 +142,29 @@ Sets the raw Luau bytecode of a given script. Returns true if operation is succe
 ```lua
 local animate = game:GetService("Players").LocalPlayer.Character.Animate
 local bytecode = getscriptbytecode(animate)
+```
+
+---
+
+## setscriptbytecode
+
+```lua
+function setscriptbytecode(script: LocalScript | ModuleScript, bytecode: string): boolean
+```
+
+Sets the raw Luau bytecode of a given script. Returns true if operation is successful.
+
+### Parameters
+
+ * `script` - A client-running LocalScript or ModuleScript.
+ * `bytecode` - Compiled Luau bytecode.
+
+### Example
+
+```lua
+local script = Instance.new("LocalScript")
+local success = setscriptbytecode(script, "")
+print(success) -- true
 ```
 
 ---
