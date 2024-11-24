@@ -71,7 +71,6 @@ task.defer(function()
     print("BNC Test Summary")
     print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
     print("⛔ " .. fails .. " tests failed")
-    print("ℹ️ " .. tostring(printidentity()) .. " on " .. tostring(identifyexecutor()) .. ". (This may be faked)")
     print("⚠️ " .. tostring(undefined) .. " globals are missing aliases")
 end)
 
