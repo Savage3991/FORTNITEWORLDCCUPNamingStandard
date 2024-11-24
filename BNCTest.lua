@@ -1,6 +1,6 @@
 local passes, fails, undefined = 0, 0, 0
 local running = 0
-
+local exploit = tostring(identifyexecutor())
 local function getGlobal(path)
 	local value = getfenv(0)
 
