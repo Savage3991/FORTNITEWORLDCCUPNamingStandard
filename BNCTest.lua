@@ -56,23 +56,25 @@ end
 print("Intializing BNC Test..")
 wait(1)
 print(" ")
-print("BNC Compatibility Check - " .. tostring(identifyexecutor())))
+print("BNC Compatibility Check - " .. tostring(identifyexecutor()))
 print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
 
 task.defer(function()
-	repeat task.wait() until running == 0
+    repeat
+        task.wait()
+    until running == 0
 
-	local rate = math.round(passes / (passes + fails) * 100)
-	local outOf = passes .. " out of " .. (passes + fails)
+    local rate = math.round(passes / (passes + fails) * 100)
+    local outOf = passes .. " out of " .. (passes + fails)
 
-	print("\n")
-
-	print("BNC Summary - " .. exploit)
-	print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
-	print("⛔ " .. fails .. " tests failed")
-        print("ℹ️" .. tostring(printidentity())) .. "on " .. tostring(identifyexecutor())) .. ". (This may be faked)")
-	print("⚠️ " .. undefined .. " globals are missing aliases")
+    print("\n")
+    print("BNC Summary - " .. exploit)
+    print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
+    print("⛔ " .. fails .. " tests failed")
+    print("ℹ️ " .. tostring(printidentity()) .. " on " .. tostring(identifyexecutor()) .. ". (This may be faked)")
+    print("⚠️ " .. tostring(undefined) .. " globals are missing aliases")
 end)
+
 
 -- Cache
 
