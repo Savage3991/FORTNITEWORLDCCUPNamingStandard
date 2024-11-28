@@ -111,10 +111,10 @@ end
 
 ---
 
-## queue_on_teleport
+## queueonteleport
 
 ```lua
-function queue_on_teleport(code: string): ()
+function queueonteleport(code: string): ()
 ```
 
 Queues the specified script to be executed after the player teleports to a different place.
@@ -122,10 +122,6 @@ Queues the specified script to be executed after the player teleports to a diffe
 ### Parameters
 
  * `code` - The script to execute.
-
-### Aliases
-
- * `queueonteleport` - Will supercede this function in the future.
 
 ### Example
 
