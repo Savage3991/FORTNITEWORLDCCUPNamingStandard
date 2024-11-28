@@ -13,7 +13,20 @@ local function getGlobal(path)
 	return value
 end
 
-local function test(name, aliases, callback)
+local function hasdeps(name,deps)
+	local missing = {}
+	for i,v in deps do
+		if not getGlobal(v) then
+			table.insert(missing,v)
+		end
+	end
+
+	if #missing > 0 then
+		warn("⚠️ " .. name .. " missing dependencies: " .. table.concat(missing,", "))
+	end
+end
+
+local function test(name, aliases, callback,deps)
 	running += 1
 
 	task.spawn(function()
@@ -24,12 +37,13 @@ local function test(name, aliases, callback)
 			warn("⛔ " .. name)
 		else
 			local success, message = pcall(callback)
-	
+			
 			if success then
 				passes += 1
 				print("✅ " .. name .. (message and " • " .. message or ""))
 			else
 				fails += 1
+				hasdeps(name, deps or {})
 				warn("⛔ " .. name .. " failed: " .. message)
 			end
 		end
@@ -89,7 +103,7 @@ test("cache.iscached", {}, function()
 	assert(cache.iscached(part), "Part should be cached")
 	cache.invalidate(part)
 	assert(not cache.iscached(part), "Part should not be cached")
-end)
+end, {"cache.invalidate"})
 
 test("cache.replace", {}, function()
 	local part = Instance.new("Part")
@@ -111,7 +125,7 @@ test("compareinstances", {}, function()
 	local clone = cloneref(part)
 	assert(part ~= clone, "Clone should not be equal to original")
 	assert(compareinstances(part, clone), "Clone should be equal to original when using compareinstances()")
-end)
+end, {"cloneref"})
 
 -- Closures
 
@@ -171,7 +185,7 @@ test("getscriptclosure", {"getscriptfunction"}, function()
 	local generated = getscriptclosure(module)()
 	assert(constants ~= generated, "Generated module should not match the original")
 	assert(shallowEqual(constants, generated), "Generated constant table should be shallow equal to the original")
-end)
+end,{"getrenv"})
 
 test("hookfunction", {"replaceclosure"}, function()
 	local function test()
@@ -200,7 +214,7 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 	assert(isexecutorclosure(newcclosure(function() end)) == true, "Did not return true for an executor C closure")
 	assert(isexecutorclosure(function() end) == true, "Did not return true for an executor Luau closure")
 	assert(isexecutorclosure(print) == false, "Did not return false for a Roblox global")
-end)
+end, {"newcclosure"})
 
 test("loadstring", {}, function()
 	local animate = game:GetService("Players").LocalPlayer.Character.Animate
@@ -209,7 +223,7 @@ test("loadstring", {}, function()
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
 	assert(type(select(2, loadstring("f"))) == "string", "Loadstring did not return anything for a compiler error")
-end)
+end, {"getscriptbytecode"})
 
 test("newcclosure", {}, function()
 	local function test()
@@ -219,7 +233,7 @@ test("newcclosure", {}, function()
 	assert(test() == testC(), "New C closure should return the same value as the original")
 	assert(test ~= testC, "New C closure should not be same as the original")
 	assert(iscclosure(testC), "New C closure should be a C closure")
-end)
+end, {"iscclosure"})
 
 -- Console
 
@@ -251,7 +265,7 @@ test("crypt.encrypt", {}, function()
 	assert(iv, "crypt.encrypt should return an IV")
 	local decrypted = crypt.decrypt(encrypted, key, iv, "CBC")
 	assert(decrypted == "test", "Failed to decrypt raw string from encrypted data")
-end)
+end, {"crypt.generatekey","crypt.decrypt"})
 
 test("decompile", {"saveinstance"}, function()
     local script = Instance.new("LocalScript")
@@ -265,18 +279,18 @@ test("crypt.decrypt", {}, function()
 	local encrypted = crypt.encrypt("test", key, iv, "CBC")
 	local decrypted = crypt.decrypt(encrypted, key, iv, "CBC")
 	assert(decrypted == "test", "Failed to decrypt raw string from encrypted data")
-end)
+end, {"crypt.encrypt","crypt.generatekey"})
 
 test("crypt.generatebytes", {}, function()
 	local size = math.random(10, 100)
 	local bytes = crypt.generatebytes(size)
 	assert(#crypt.base64decode(bytes) == size, "The decoded result should be " .. size .. " bytes long (got " .. #crypt.base64decode(bytes) .. " decoded, " .. #bytes .. " raw)")
-end)
+end, {"crypt.base64decode"})
 
 test("crypt.generatekey", {}, function()
 	local key = crypt.generatekey()
 	assert(#crypt.base64decode(key) == 32, "Generated key should be 32 bytes long when decoded")
-end)
+end, {"crypt.base64decode"})
 
 test("crypt.hash", {}, function()
 	local algorithms = {'sha1', 'sha384', 'sha512', 'md5', 'sha256', 'sha3-224', 'sha3-256', 'sha3-512'}
@@ -367,7 +381,7 @@ test("debug.getprotos", {}, function()
 			return "Proto return values are disabled on this executor"
 		end
 	end
-end)
+end, {"debug.getproto"})
 
 test("debug.getstack", {}, function()
 	local _ = "a" .. "b"
@@ -432,7 +446,7 @@ end
 test("readfile", {}, function()
 	writefile(".tests/readfile.txt", "success")
 	assert(readfile(".tests/readfile.txt") == "success", "Did not return the contents of the file")
-end)
+end, {"writefile"})
 
 test("listfiles", {}, function()
 	makefolder(".tests/listfiles")
@@ -448,7 +462,7 @@ test("listfiles", {}, function()
 	local folders = listfiles(".tests/listfiles_2")
 	assert(#folders == 2, "Did not return the correct number of folders")
 	assert(isfolder(folders[1]), "Did not return a folder path")
-end)
+end, {"makefolder","writefile","isfile","readfile","isfolder"})
 
 test("writefile", {}, function()
 	writefile(".tests/writefile.txt", "success")
@@ -460,26 +474,26 @@ test("writefile", {}, function()
 	if not requiresFileExt then
 		return "This executor requires a file extension in writefile"
 	end
-end)
+end,{"readfile","isfile"})
 
 test("makefolder", {}, function()
 	makefolder(".tests/makefolder")
 	assert(isfolder(".tests/makefolder"), "Did not create the folder")
-end)
+end, {"isfolder"})
 
 test("appendfile", {}, function()
 	writefile(".tests/appendfile.txt", "su")
 	appendfile(".tests/appendfile.txt", "cce")
 	appendfile(".tests/appendfile.txt", "ss")
 	assert(readfile(".tests/appendfile.txt") == "success", "Did not append the file")
-end)
+end,{"writefile","readfile"})
 
 test("isfile", {}, function()
 	writefile(".tests/isfile.txt", "success")
 	assert(isfile(".tests/isfile.txt") == true, "Did not return true for a file")
 	assert(isfile(".tests") == false, "Did not return false for a folder")
 	assert(isfile(".tests/doesnotexist.exe") == false, "Did not return false for a nonexistent path (got " .. tostring(isfile(".tests/doesnotexist.exe")) .. ")")
-end)
+end,{"writefile"})
 
 test("isfolder", {}, function()
 	assert(isfolder(".tests") == true, "Did not return false for a folder")
@@ -490,13 +504,13 @@ test("delfolder", {}, function()
 	makefolder(".tests/delfolder")
 	delfolder(".tests/delfolder")
 	assert(isfolder(".tests/delfolder") == false, "Failed to delete folder (isfolder = " .. tostring(isfolder(".tests/delfolder")) .. ")")
-end)
+end,{"makefolder","isfolder"})
 
 test("delfile", {}, function()
 	writefile(".tests/delfile.txt", "Hello, world!")
 	delfile(".tests/delfile.txt")
 	assert(isfile(".tests/delfile.txt") == false, "Failed to delete file (isfile = " .. tostring(isfile(".tests/delfile.txt")) .. ")")
-end)
+end,{"writefile","isfile"})
 
 test("loadfile", {}, function()
 	writefile(".tests/loadfile.txt", "return ... + 1")
@@ -504,7 +518,7 @@ test("loadfile", {}, function()
 	writefile(".tests/loadfile.txt", "f")
 	local callback, err = loadfile(".tests/loadfile.txt")
 	assert(err and not callback, "Did not return an error message for a compiler error")
-end)
+end,{"writefile"})
 
 test("dofile", {})
 
@@ -589,7 +603,7 @@ test("sethiddenproperty", {}, function()
 	local hidden = sethiddenproperty(fire, "size_xml", 10)
 	assert(hidden, "Did not return true for the hidden property")
 	assert(gethiddenproperty(fire, "size_xml") == 10, "Did not set the hidden property")
-end)
+end,{"gethiddenproperty"})
 
 test("gethui", {}, function()
 	assert(typeof(gethui()) == "Instance", "Did not return an Instance")
@@ -617,7 +631,7 @@ test("setscriptable", {}, function()
 	assert(isscriptable(fire, "size_xml") == true, "Did not set the scriptable property")
 	fire = Instance.new("Fire")
 	assert(isscriptable(fire, "size_xml") == false, "⚠️⚠️ setscriptable persists between unique instances ⚠️⚠️")
-end)
+end,{"isscriptable"})
 
 test("setrbxclipboard", {})
 
@@ -634,7 +648,7 @@ test("hookmetamethod", {}, function()
 	local ref = hookmetamethod(object, "__index", function() return true end)
 	assert(object.test == true, "Failed to hook a metamethod and change the return value")
 	assert(ref() == false, "Did not return the original function")
-end)
+end,{"newcclosure"})
 
 test("getnamecallmethod", {}, function()
 	local method
@@ -647,7 +661,7 @@ test("getnamecallmethod", {}, function()
 	end)
 	game:GetService("Lighting")
 	assert(method == "GetService", "Did not get the correct method (GetService)")
-end)
+end, {"hookmetamethod"})
 
 test("isreadonly", {}, function()
 	local object = {}
@@ -686,14 +700,14 @@ test("lz4compress", {}, function()
 	local compressed = lz4compress(raw)
 	assert(type(compressed) == "string", "Compression did not return a string")
 	assert(lz4decompress(compressed, #raw) == raw, "Decompression did not return the original string")
-end)
+end,{"lz4decompress"})
 
 test("lz4decompress", {}, function()
 	local raw = "Hello, world!"
 	local compressed = lz4compress(raw)
 	assert(type(compressed) == "string", "Compression did not return a string")
 	assert(lz4decompress(compressed, #raw) == raw, "Decompression did not return the original string")
-end)
+end,{"lz4compress"})
 
 test("messagebox", {})
 
@@ -838,7 +852,7 @@ test("isrenderobj", {}, function()
 	drawing.Visible = true
 	assert(isrenderobj(drawing) == true, "Did not return true for an Image")
 	assert(isrenderobj(newproxy()) == false, "Did not return false for a blank table")
-end)
+end,{"Drawing.new"})
 
 test("getrenderproperty", {}, function()
 	local drawing = Drawing.new("Image")
@@ -850,14 +864,14 @@ test("getrenderproperty", {}, function()
 	if not success or not result then
 		return "Image.Color is not supported"
 	end
-end)
+end,{"Drawing.new"})
 
 test("setrenderproperty", {}, function()
 	local drawing = Drawing.new("Square")
 	drawing.Visible = true
 	setrenderproperty(drawing, "Visible", false)
 	assert(drawing.Visible == false, "Did not set the value for Square.Visible")
-end)
+end,{"Drawing.new"})
 
 test("cleardrawcache", {}, function()
 	cleardrawcache()
