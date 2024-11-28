@@ -147,36 +147,10 @@ local bytecode = getscriptbytecode(animate)
 
 ---
 
-## setscriptbytecode
-`🛡️ Security`
-```lua
-function setscriptbytecode(script: LocalScript | ModuleScript, bytecode: string): boolean
-```
-
-Sets the raw Luau bytecode of a given script. Returns true if operation is successful.
-> ### 🛡️ Security
-> All executors should disallow bytecode writing to scripts with elevated permissions 
-
-
-### Parameters
-
- * `script` - A client-running LocalScript or ModuleScript.
- * `bytecode` - Compiled Luau bytecode.
-
-### Example
+## saveinstance
 
 ```lua
-local script = Instance.new("LocalScript")
-local success = setscriptbytecode(script, "")
-print(success) -- true
-```
-
----
-
-## decompile
-
-```lua
-function decompile(script: LocalScript | ModuleScript): string
+function saveinstance(script: LocalScript | ModuleScript): string
 ```
 
 Decompiles the script returning a decompiled version of it's source code.
@@ -188,7 +162,7 @@ Decompiles the script returning a decompiled version of it's source code.
 ### Example
 
 ```lua
-local decompiled_source = decompile(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
+local decompiled_source = saveinstance(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
 print("Decompiled Source: ",decompiled_source)
 ```
 
