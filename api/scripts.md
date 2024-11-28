@@ -1,3 +1,4 @@
+
 # Scripts
 
 The **script** functions provide access to script environments and internal state.
@@ -147,12 +148,15 @@ local bytecode = getscriptbytecode(animate)
 ---
 
 ## setscriptbytecode
-
+`🛡️ Security`
 ```lua
 function setscriptbytecode(script: LocalScript | ModuleScript, bytecode: string): boolean
 ```
 
 Sets the raw Luau bytecode of a given script. Returns true if operation is successful.
+> ### 🛡️ Security
+> All executors should disallow bytecode writing to scripts with elevated permissions 
+
 
 ### Parameters
 
