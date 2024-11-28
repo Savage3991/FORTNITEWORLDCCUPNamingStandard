@@ -166,6 +166,25 @@ Decompiles the script returning a decompiled version of it's source code.
 local decompiled_source = getscriptsource(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
 print("Decompiled Source: ",decompiled_source)
 ```
+---
+
+## saveinstance
+
+```lua
+function saveinstance(object: Instance?, filepath: string?, options: table?): nil
+```
+
+Saves the current game into your workspace folder as a `.RBXL` file.
+
+* If an `object` is specified, it will save that object and its descendants as a `.RBXM` file.
+* If the `object` is `game`, it will be saved as a `.RBXL` file.
+
+If `filepath` is specified, it will write the file to the specified path.
+`filepath` does not need to contain a file extension, only the name of the file.
+
+### Parameters:
+
+* `filepath` - path to save the `.RBXL/RBXM` file.
 
 ---
 
