@@ -147,10 +147,11 @@ local bytecode = getscriptbytecode(animate)
 
 ---
 
-## saveinstance
+## getscriptsource
+`⚠️ WARNING: DOES NOT BYPASS OBSFUCATORS AND RETURNS ONLY THE SOURCE CODE FOUND IN THE SCRIPT.`
 
 ```lua
-function saveinstance(script: LocalScript | ModuleScript): string
+function getscriptsource(script: LocalScript | ModuleScript): string
 ```
 
 Decompiles the script returning a decompiled version of it's source code.
@@ -162,7 +163,7 @@ Decompiles the script returning a decompiled version of it's source code.
 ### Example
 
 ```lua
-local decompiled_source = saveinstance(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
+local decompiled_source = getscriptsource(game:GetService("Players").LocalPlayer.PlayerScripts.PlayerModule)
 print("Decompiled Source: ",decompiled_source)
 ```
 
