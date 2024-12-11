@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Central Naming Convention (CNC)** has kept the tradition of the retired [Unified Naming Convention (UNC)](https://github.com/UnifiedNamingConvention/). CNC will pave a way into having a seamless and universally compatible scripting API, both code maintainable and user-friendly. On the terrain of UNC, CNC intends to cover all the new aspects of scripting challenges while keeping the experience a "vanilla" one for developers.
+**Central Naming Convention (CNC)** has kept the tradition of the retired [Unified Naming Convention (UNC)](https://github.com/UnifiedNamingConvention/). CNC will continue UNC's legacy and continue to maintain it's API.
 
 ## Why CNC?
 
