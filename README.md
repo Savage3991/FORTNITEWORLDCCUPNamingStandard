@@ -6,13 +6,13 @@
 
 ## Why CNC?
 
-As of now, scripting has posed trouble in support for multiple executors. Each executor has its own names of generic functions, leading to buggy scripts and more time used coding executor support. For instance, the condition of checking whether it is being executed by various executors now becomes : 
+As of a few years ago, scripting has posed trouble in support for multiple executors. Each executor has its own names of generic functions, leading to buggy scripts and more time used coding executor support. For instance, the condition of checking whether it is being executed by various executors now becomes : 
 
 ```lua
 local is_executor_closure = is_syn_closure or is_fluxus_closure or is_sentinel_closure or is_krnl_closure or is_proto_closure or is_calamari_closure or is_electron_closure or is_elysian_closure
 ```
 
-This redundancy imposes an additional annoyance of writing cross-compatibility scripts on developers. It defeats that by establishing a central , brandless standard which all executors can use.
+This redundancy imposes an additional annoyance of writing cross-compatibility scripts on developers. It defeats that by establishing a central , brandless standard which all executors can use. Hence why UNC was originally made, then retired then was continued by CNC as we don't want to go back to the Pre-UNC scripting experience.
 
 ## Contributing
 The standard is written in markdown on this GitHub. Edits or additions are done through pull requests. Edits and additions are manually approved by the CNC Team and its advisors then is discussed by everyone. Go [here](CONTRIBUTING.md) for a guide on contributing.
