@@ -1,34 +1,30 @@
-# Better Naming Convention
-aka BNC, is an organization between executor developers to provide a unified scripting API for our scripters.
+# Central Naming Convention (CNC)
 
-**Website will be avaliable soon :)**
+## Overview
 
-## Why?
-Over the years scripting has gotten more and more complex to support multiple executors. This is because of the many unique naming conventions various executors use.
+**Central Naming Convention (CNC)** has kept the tradition of the abandoned [Unified Naming Convention (UNC)](https://github.com/UnifiedNamingConvention/). CNC will pave a way into having a seamless and universally compatible scripting API, both code maintainable and user-friendly. On the terrain of UNC, CNC intends to cover all the new aspects of scripting challenges while keeping the experience a "vanilla" one for developers.
 
-Consider the following scenario. You want to know if a function belongs to the executor or not. In order for this code to be cross compatiable with all executors code like this is needed:
+## Why CNC?
+
+As of now, scripting has posed trouble in support for multiple executors. Each executor has its own names of generic functions, leading to buggy scripts and more time used coding executor support. For instance, the condition of checking whether it is being executed by various executors now becomes : 
+
 ```lua
 local is_executor_closure = is_syn_closure or is_fluxus_closure or is_sentinel_closure or is_krnl_closure or is_proto_closure or is_calamari_closure or is_electron_closure or is_elysian_closure
 ```
-This is reality for scripters who want cross compatibilty in their scripts. Scripters shouldn't have to do such laborous work just to attain cross compatability. The BNC seeks to solve this problem using naming conventions everyone agrees upon and follows.
 
-One variant of a script should naturally work on all script executors which have their environment properly fitted to the BNC. 
+This redundancy imposes an additional annoyance of writing cross-compatibility scripts on developers. It defeats that by establishing a central , brandless standard which all executors can use.
 
-## How?
-The BNC provides standards for naming conventions as well as API functionality. The standard is written in markdown on this GitHub. Edits or additions are done through pull requests. Edits and additions are manually approved by the BNC council and discussed by everyone.
+## Contributing
+The standard is written in markdown on this GitHub. Edits or additions are done through pull requests. Edits and additions are manually approved by the CNC Team and its advisors then is discussed by everyone. Go [here](CONTRIBUTING.md) for a guide on contributing.
 
-## Supporting BNC
-As a product owner, your support of BNC by following the API will result in a far smoother experience for scripters, as they are able to work on scripts that they can confidently say will work on **most** products. Once you have implemented BNC's API, you can display so by adding the badge to your website, thread or application.
+## Supporting the CNC
+As a product owner, your support of the CNC by following the API will result in a far smoother experience for scripters, as they are able to work on scripts that they can confidently say will work on **most** products. Once you have implemented the CNC's API, you can display so by adding the badge to your website, thread or application.
 
-You can find the badge here: soon
+You can find the badge avaliable on our repo soon :)
 
 This will notify people of your alliance in providing scripters with an easier method of engineering scripts that your consumers can enjoy.
 
-NOTICE: If you, as a product owner, do not have all of these functions but yet support the ones you do - you then support BNC! You are more than able to display the badge on your website.
+NOTICE: If you, as a product owner, do not have all of these functions but yet support the ones you do - you then support UNC! You are more than able to display the badge on your website.
 
-## Checking your environment
-
-You can run the BNC environment checking script to see how well your executor environment supports the BNC standard. Find the script [here.](BNCTest.lua) The script determines what is missing, and writes the results to file under workspace.
-
-## Contributing
-Go [here](CONTRIBUTING.md) for a guide on contributing.
+## Compatability:
+You can run the CNC environment checking script to see how well your executor environment supports the CNC standard. Find the script [here.](CNCTest.lua)
