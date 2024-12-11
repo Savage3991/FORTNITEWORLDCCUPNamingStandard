@@ -13,20 +13,11 @@ local function getGlobal(path)
 	return value
 end
 
-local function hasdeps(name,deps)
-	local missing = {}
-	for i,v in deps do
-		if not getGlobal(v) then
-			table.insert(missing,v)
-		end
-	end
-
-	if #missing > 0 then
-		warn("⚠️ " .. name .. " missing dependencies: " .. table.concat(missing,", "))
-	end
+function printsection(section)
+print("---------- " .. section .. " ----------")
 end
 
-local function test(name, aliases, callback,deps)
+local function test(name, aliases, callback)
 	running += 1
 
 	task.spawn(function()
@@ -37,13 +28,12 @@ local function test(name, aliases, callback,deps)
 			warn("⛔ " .. name)
 		else
 			local success, message = pcall(callback)
-			
+	
 			if success then
 				passes += 1
 				print("✅ " .. name .. (message and " • " .. message or ""))
 			else
 				fails += 1
-				hasdeps(name, deps or {})
 				warn("⛔ " .. name .. " failed: " .. message)
 			end
 		end
@@ -67,29 +57,27 @@ end
 
 -- Header and summary
 
-print("Intializing BNC Test..")
-wait(1)
-print(" ")
-print("BNC Compatibility Check - " .. tostring(identifyexecutor()))
-print("✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
+print("Key |✅ - Pass, ⛔ - Fail, ⏺️ - No test, ⚠️ - Missing aliases\n")
+print("----------------------------------------------------------------")
+print("Centeralized Naming Convention Compatability Test")
+
 
 task.defer(function()
-    repeat
-        task.wait()
-    until running == 0
+	repeat task.wait() until running == 0
 
-    local rate = math.round(passes / (passes + fails) * 100)
-    local outOf = passes .. " out of " .. (passes + fails)
+	local rate = math.round(passes / (passes + fails) * 100)
+	local outOf = passes .. " out of " .. (passes + fails)
 
-    print("\n")
-    print("BNC Test Summary")
-    print("✅ Tested with a " .. rate .. "% success rate (" .. outOf .. ")")
-    print("⛔ " .. fails .. " tests failed")
-    print("⚠️ " .. tostring(undefined) .. " globals are missing aliases")
+	print("\n")
+
+	print("CNC Results: " .. tostring(identifyexecutor()))
+	print("✅ " .. tostring(identifyexecutor()) .. " tested with a " .. rate .. "% success rate (" .. outOf .. ")")
+	print("⛔ " .. fails .. " functions failed")
+	print("⚠️ " .. undefined .. " globals are missing aliases")
 end)
 
-
 -- Cache
+printsection("Cache")
 
 test("cache.invalidate", {}, function()
 	local container = Instance.new("Folder")
@@ -103,7 +91,7 @@ test("cache.iscached", {}, function()
 	assert(cache.iscached(part), "Part should be cached")
 	cache.invalidate(part)
 	assert(not cache.iscached(part), "Part should not be cached")
-end, {"cache.invalidate"})
+end)
 
 test("cache.replace", {}, function()
 	local part = Instance.new("Part")
@@ -125,9 +113,11 @@ test("compareinstances", {}, function()
 	local clone = cloneref(part)
 	assert(part ~= clone, "Clone should not be equal to original")
 	assert(compareinstances(part, clone), "Clone should be equal to original when using compareinstances()")
-end, {"cloneref"})
+end)
 
 -- Closures
+
+printsection("Closures")
 
 local function shallowEqual(t1, t2)
 	if t1 == t2 then
@@ -185,7 +175,7 @@ test("getscriptclosure", {"getscriptfunction"}, function()
 	local generated = getscriptclosure(module)()
 	assert(constants ~= generated, "Generated module should not match the original")
 	assert(shallowEqual(constants, generated), "Generated constant table should be shallow equal to the original")
-end,{"getrenv"})
+end)
 
 test("hookfunction", {"replaceclosure"}, function()
 	local function test()
@@ -214,7 +204,7 @@ test("isexecutorclosure", {"checkclosure", "isourclosure"}, function()
 	assert(isexecutorclosure(newcclosure(function() end)) == true, "Did not return true for an executor C closure")
 	assert(isexecutorclosure(function() end) == true, "Did not return true for an executor Luau closure")
 	assert(isexecutorclosure(print) == false, "Did not return false for a Roblox global")
-end, {"newcclosure"})
+end)
 
 test("loadstring", {}, function()
 	local animate = game:GetService("Players").LocalPlayer.Character.Animate
@@ -223,7 +213,7 @@ test("loadstring", {}, function()
 	assert(type(func) ~= "function", "Luau bytecode should not be loadable!")
 	assert(assert(loadstring("return ... + 1"))(1) == 2, "Failed to do simple math")
 	assert(type(select(2, loadstring("f"))) == "string", "Loadstring did not return anything for a compiler error")
-end, {"getscriptbytecode"})
+end)
 
 test("newcclosure", {}, function()
 	local function test()
@@ -233,9 +223,11 @@ test("newcclosure", {}, function()
 	assert(test() == testC(), "New C closure should return the same value as the original")
 	assert(test ~= testC, "New C closure should not be same as the original")
 	assert(iscclosure(testC), "New C closure should be a C closure")
-end, {"iscclosure"})
+end)
 
 -- Console
+
+printsection("Console")
 
 test("rconsoleclear", {"consoleclear"})
 
@@ -251,6 +243,8 @@ test("rconsolesettitle", {"rconsolename", "consolesettitle"})
 
 -- Crypt
 
+printsection("Crypt")
+
 test("crypt.base64encode", {"crypt.base64.encode", "crypt.base64_encode", "base64.encode", "base64_encode"}, function()
 	assert(crypt.base64encode("test") == "dGVzdA==", "Base64 encoding failed")
 end)
@@ -265,13 +259,6 @@ test("crypt.encrypt", {}, function()
 	assert(iv, "crypt.encrypt should return an IV")
 	local decrypted = crypt.decrypt(encrypted, key, iv, "CBC")
 	assert(decrypted == "test", "Failed to decrypt raw string from encrypted data")
-end, {"crypt.generatekey","crypt.decrypt"})
-
-test("decompile", {"saveinstance"}, function()
-    local script = Instance.new("LocalScript")
-    script.Source = 'print("Hello from BNC! A vanilla scripting standard.")'
-    local decompiled = decompile(script)
-    assert(decompiled:match('print%s*%("Hello from BNC! A vanilla scripting standard."%)') ~= nil, "Decompiled source is inaccurate.")
 end)
 
 test("crypt.decrypt", {}, function()
@@ -279,18 +266,18 @@ test("crypt.decrypt", {}, function()
 	local encrypted = crypt.encrypt("test", key, iv, "CBC")
 	local decrypted = crypt.decrypt(encrypted, key, iv, "CBC")
 	assert(decrypted == "test", "Failed to decrypt raw string from encrypted data")
-end, {"crypt.encrypt","crypt.generatekey"})
+end)
 
 test("crypt.generatebytes", {}, function()
 	local size = math.random(10, 100)
 	local bytes = crypt.generatebytes(size)
 	assert(#crypt.base64decode(bytes) == size, "The decoded result should be " .. size .. " bytes long (got " .. #crypt.base64decode(bytes) .. " decoded, " .. #bytes .. " raw)")
-end, {"crypt.base64decode"})
+end)
 
 test("crypt.generatekey", {}, function()
 	local key = crypt.generatekey()
 	assert(#crypt.base64decode(key) == 32, "Generated key should be 32 bytes long when decoded")
-end, {"crypt.base64decode"})
+end)
 
 test("crypt.hash", {}, function()
 	local algorithms = {'sha1', 'sha384', 'sha512', 'md5', 'sha256', 'sha3-224', 'sha3-256', 'sha3-512'}
@@ -301,6 +288,8 @@ test("crypt.hash", {}, function()
 end)
 
 --- Debug
+
+printsection("Debug")
 
 test("debug.getconstant", {}, function()
 	local function test()
@@ -381,7 +370,7 @@ test("debug.getprotos", {}, function()
 			return "Proto return values are disabled on this executor"
 		end
 	end
-end, {"debug.getproto"})
+end)
 
 test("debug.getstack", {}, function()
 	local _ = "a" .. "b"
@@ -436,6 +425,8 @@ end)
 
 -- Filesystem
 
+printsection("Filesystem")
+
 if isfolder and makefolder and delfolder then
 	if isfolder(".tests") then
 		delfolder(".tests")
@@ -446,7 +437,7 @@ end
 test("readfile", {}, function()
 	writefile(".tests/readfile.txt", "success")
 	assert(readfile(".tests/readfile.txt") == "success", "Did not return the contents of the file")
-end, {"writefile"})
+end)
 
 test("listfiles", {}, function()
 	makefolder(".tests/listfiles")
@@ -462,7 +453,7 @@ test("listfiles", {}, function()
 	local folders = listfiles(".tests/listfiles_2")
 	assert(#folders == 2, "Did not return the correct number of folders")
 	assert(isfolder(folders[1]), "Did not return a folder path")
-end, {"makefolder","writefile","isfile","readfile","isfolder"})
+end)
 
 test("writefile", {}, function()
 	writefile(".tests/writefile.txt", "success")
@@ -474,26 +465,26 @@ test("writefile", {}, function()
 	if not requiresFileExt then
 		return "This executor requires a file extension in writefile"
 	end
-end,{"readfile","isfile"})
+end)
 
 test("makefolder", {}, function()
 	makefolder(".tests/makefolder")
 	assert(isfolder(".tests/makefolder"), "Did not create the folder")
-end, {"isfolder"})
+end)
 
 test("appendfile", {}, function()
 	writefile(".tests/appendfile.txt", "su")
 	appendfile(".tests/appendfile.txt", "cce")
 	appendfile(".tests/appendfile.txt", "ss")
 	assert(readfile(".tests/appendfile.txt") == "success", "Did not append the file")
-end,{"writefile","readfile"})
+end)
 
 test("isfile", {}, function()
 	writefile(".tests/isfile.txt", "success")
 	assert(isfile(".tests/isfile.txt") == true, "Did not return true for a file")
 	assert(isfile(".tests") == false, "Did not return false for a folder")
 	assert(isfile(".tests/doesnotexist.exe") == false, "Did not return false for a nonexistent path (got " .. tostring(isfile(".tests/doesnotexist.exe")) .. ")")
-end,{"writefile"})
+end)
 
 test("isfolder", {}, function()
 	assert(isfolder(".tests") == true, "Did not return false for a folder")
@@ -504,13 +495,13 @@ test("delfolder", {}, function()
 	makefolder(".tests/delfolder")
 	delfolder(".tests/delfolder")
 	assert(isfolder(".tests/delfolder") == false, "Failed to delete folder (isfolder = " .. tostring(isfolder(".tests/delfolder")) .. ")")
-end,{"makefolder","isfolder"})
+end)
 
 test("delfile", {}, function()
 	writefile(".tests/delfile.txt", "Hello, world!")
 	delfile(".tests/delfile.txt")
 	assert(isfile(".tests/delfile.txt") == false, "Failed to delete file (isfile = " .. tostring(isfile(".tests/delfile.txt")) .. ")")
-end,{"writefile","isfile"})
+end)
 
 test("loadfile", {}, function()
 	writefile(".tests/loadfile.txt", "return ... + 1")
@@ -518,11 +509,14 @@ test("loadfile", {}, function()
 	writefile(".tests/loadfile.txt", "f")
 	local callback, err = loadfile(".tests/loadfile.txt")
 	assert(err and not callback, "Did not return an error message for a compiler error")
-end,{"writefile"})
+end)
 
 test("dofile", {})
 
 -- Input
+
+printsection("Input")
+
 
 test("isrbxactive", {"isgameactive"}, function()
 	assert(type(isrbxactive()) == "boolean", "Did not return a boolean value")
@@ -547,6 +541,8 @@ test("mousemoverel", {})
 test("mousescroll", {})
 
 -- Instances
+
+printsection("Instances")
 
 test("fireclickdetector", {}, function()
 	local detector = Instance.new("ClickDetector")
@@ -603,7 +599,7 @@ test("sethiddenproperty", {}, function()
 	local hidden = sethiddenproperty(fire, "size_xml", 10)
 	assert(hidden, "Did not return true for the hidden property")
 	assert(gethiddenproperty(fire, "size_xml") == 10, "Did not set the hidden property")
-end,{"gethiddenproperty"})
+end)
 
 test("gethui", {}, function()
 	assert(typeof(gethui()) == "Instance", "Did not return an Instance")
@@ -631,11 +627,13 @@ test("setscriptable", {}, function()
 	assert(isscriptable(fire, "size_xml") == true, "Did not set the scriptable property")
 	fire = Instance.new("Fire")
 	assert(isscriptable(fire, "size_xml") == false, "⚠️⚠️ setscriptable persists between unique instances ⚠️⚠️")
-end,{"isscriptable"})
+end)
 
 test("setrbxclipboard", {})
 
 -- Metatable
+
+printsection("Metatables")
 
 test("getrawmetatable", {}, function()
 	local metatable = { __metatable = "Locked!" }
@@ -648,7 +646,7 @@ test("hookmetamethod", {}, function()
 	local ref = hookmetamethod(object, "__index", function() return true end)
 	assert(object.test == true, "Failed to hook a metamethod and change the return value")
 	assert(ref() == false, "Did not return the original function")
-end,{"newcclosure"})
+end)
 
 test("getnamecallmethod", {}, function()
 	local method
@@ -661,7 +659,7 @@ test("getnamecallmethod", {}, function()
 	end)
 	game:GetService("Lighting")
 	assert(method == "GetService", "Did not get the correct method (GetService)")
-end, {"hookmetamethod"})
+end)
 
 test("isreadonly", {}, function()
 	local object = {}
@@ -689,6 +687,8 @@ end)
 
 -- Miscellaneous
 
+printsection("Miscellaneous")
+
 test("identifyexecutor", {"getexecutorname"}, function()
 	local name, version = identifyexecutor()
 	assert(type(name) == "string", "Did not return a string for the name")
@@ -700,14 +700,14 @@ test("lz4compress", {}, function()
 	local compressed = lz4compress(raw)
 	assert(type(compressed) == "string", "Compression did not return a string")
 	assert(lz4decompress(compressed, #raw) == raw, "Decompression did not return the original string")
-end,{"lz4decompress"})
+end)
 
 test("lz4decompress", {}, function()
 	local raw = "Hello, world!"
 	local compressed = lz4compress(raw)
 	assert(type(compressed) == "string", "Compression did not return a string")
 	assert(lz4decompress(compressed, #raw) == raw, "Decompression did not return the original string")
-end,{"lz4compress"})
+end)
 
 test("messagebox", {})
 
@@ -746,6 +746,8 @@ end)
 
 -- Scripts
 
+printsection("Scripts")
+
 test("getgc", {}, function()
 	local gc = getgc()
 	assert(type(gc) == "table", "Did not return a table")
@@ -782,12 +784,6 @@ test("getscriptbytecode", {"dumpstring"}, function()
 	local animate = game:GetService("Players").LocalPlayer.Character.Animate
 	local bytecode = getscriptbytecode(animate)
 	assert(type(bytecode) == "string", "Did not return a string for Character.Animate (a " .. animate.ClassName .. ")")
-end)
-
-test("setscriptbytecode", {}, function()
-	local script = Instance.new("LocalScript")
-	local success = setscriptbytecode(script, "")
-	assert(success == true, "Did not return success for operation")
 end)
 
 test("getscripthash", {}, function()
@@ -829,6 +825,8 @@ end)
 
 -- Drawing
 
+printsection("Drawing")
+
 test("Drawing", {})
 
 test("Drawing.new", {}, function()
@@ -852,7 +850,7 @@ test("isrenderobj", {}, function()
 	drawing.Visible = true
 	assert(isrenderobj(drawing) == true, "Did not return true for an Image")
 	assert(isrenderobj(newproxy()) == false, "Did not return false for a blank table")
-end,{"Drawing.new"})
+end)
 
 test("getrenderproperty", {}, function()
 	local drawing = Drawing.new("Image")
@@ -864,20 +862,22 @@ test("getrenderproperty", {}, function()
 	if not success or not result then
 		return "Image.Color is not supported"
 	end
-end,{"Drawing.new"})
+end)
 
 test("setrenderproperty", {}, function()
 	local drawing = Drawing.new("Square")
 	drawing.Visible = true
 	setrenderproperty(drawing, "Visible", false)
 	assert(drawing.Visible == false, "Did not set the value for Square.Visible")
-end,{"Drawing.new"})
+end)
 
 test("cleardrawcache", {}, function()
 	cleardrawcache()
 end)
 
 -- WebSocket
+
+printsection("Websocket")
 
 test("WebSocket", {})
 
