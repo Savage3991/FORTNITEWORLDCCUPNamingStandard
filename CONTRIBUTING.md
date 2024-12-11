@@ -10,7 +10,7 @@
 
 * Functions must be named appropriately, if you are contributing one - the following criteria applies for the naming:
   * No brand names should be visible in your documentation.
-    * This also includes function alias' - BNC aims to be a vanilla naming convention, not a branded one
+    * This also includes function alias' - CNC aims to be a vanilla naming convention, not a branded one
    * The function name must be **descriptive of what the function does**.
    * Aliases for shortening function names without good reason are *not* allowed. For example, `hookfunc` is not a alias supported by BNC. Function names should be written out in full.
   
@@ -20,4 +20,4 @@
 * Please test your function tests and make sure they actually work.
 
 ## Submitting your edits and/or additions
-This can be done through [github pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests). Clone the repository, make your changes, then submit a pull request. The pull request will be reviewed by several members of the BNC before it is merged.
+This can be done through [github pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests). Clone the repository, make your changes, then submit a pull request. The pull request will be reviewed by several members of the CNC before it is merged.
